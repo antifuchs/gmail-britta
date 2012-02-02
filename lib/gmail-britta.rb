@@ -71,14 +71,16 @@ module SingleWriteAccessors
 end
 
 class GmailBritta
-  def initialize
+  def initialize(opts={})
     @filters = []
+    @me = opts[:me] || 'me'
   end
 
   attr_accessor :filters
+  attr_accessor :me
 
-  def self.filterset(&block)
-    (britta = GmailBritta.new).rules(&block)
+  def self.filterset(opts={}, &block)
+    (britta = GmailBritta.new(opts)).rules(&block)
     britta
   end
 
@@ -157,6 +159,10 @@ ATOM
       str
     end
 
+    def me
+      @britta.me
+    end
+
     def initialize(britta)
       @britta=britta
     end
@@ -223,9 +229,9 @@ ATOM
 
     def archive_unless_directed(options={})
       mark_as_read=options[:mark_read]
-      to=options[:to] || 'me'
+      tos=(options[:to] || me).to_a
       filter = Filter.new(@britta).perform do
-        has_not %W(to:#{to})
+        has_not [{:or => tos.map {|to| "to:#{to}"}}]
         archive
         if mark_as_read
           mark_read
