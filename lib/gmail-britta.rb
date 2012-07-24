@@ -112,6 +112,7 @@ class GmailBritta
       emit_filter_spec(list)
     end
     single_write_boolean_accessor :archive, 'shouldArchive'
+    single_write_boolean_accessor :delete_it, 'shouldTrash'
     single_write_boolean_accessor :mark_read, 'shouldMarkAsRead'
     single_write_boolean_accessor :mark_important, 'shouldAlwaysMarkAsImportant'
     single_write_boolean_accessor :mark_unimportant, 'shouldNeverMarkAsImportant'
@@ -259,7 +260,3 @@ ATOM
     engine.render(self)
   end
 end
-
-
-
-
