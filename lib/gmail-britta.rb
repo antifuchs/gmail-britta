@@ -5,8 +5,8 @@
 #       http://code.google.com/googleapps/domain/email_settings/developers_guide_protocol.html#GA_email_filter_main
 
 require 'rubygems'
+require 'bundler/setup'
 require 'time'
-gem 'haml'
 require 'haml'
 require 'logger'
 
