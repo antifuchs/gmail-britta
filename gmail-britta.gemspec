@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "gmail-britta"
-  s.version = "0.1.1"
+  s.version = "0.1.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Andreas Fuchs"]
-  s.date = "2012-09-10"
+  s.date = "2012-10-12"
   s.description = "This gem helps create large (>50) gmail filter chains by writing xml compatible with gmail's \"import/export filters\" feature."
   s.email = "asf@boinkor.net"
   s.extra_rdoc_files = [
