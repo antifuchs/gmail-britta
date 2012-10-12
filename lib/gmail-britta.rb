@@ -11,7 +11,7 @@ require 'haml'
 require 'logger'
 
 $log = Logger.new(STDERR)
-$log.level = Logger::DEBUG
+$log.level = Logger::INFO
 
 module SingleWriteAccessors
   module ClassMethods
