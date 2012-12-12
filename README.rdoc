@@ -4,6 +4,8 @@ This gem assists in writing complex gmail filters. You probably have a
 lot of questions, and I'm sorry this README currently answers so few
 of them )-:
 
+A lot of this is very hacky, as it started as a oneoff ruby script (note the global declaration of $log. Ugh!) - very sorry for the amateurish code. All I can say is, it works for me [-:
+
 == Contributing to gmail-britta
 
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet.
@@ -11,7 +13,7 @@ of them )-:
 * Fork the project.
 * Start a feature/bugfix branch.
 * Commit and push until you are happy with your contribution.
-* Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.
+* (Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.) - there are no tests yet. I would totally appreciate if you started a suite, but I wouldn't expect you to add any where there are none yet.
 * Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.
 
 == Copyright
