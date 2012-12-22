@@ -104,7 +104,7 @@ ATOM
     end
 
     def otherwise(&block)
-      filter = Filter.new(@britta).perform(&block)
+      filter = Filter.new(@britta, :log => @log).perform(&block)
       filter.merge_negated_criteria(self)
       filter.log_definition
       filter
@@ -118,7 +118,7 @@ ATOM
     end
 
     def also(&block)
-      filter = Filter.new(@britta).perform(&block)
+      filter = Filter.new(@britta, :log => @log).perform(&block)
       filter.merge_positive_criteria(self)
       filter.log_definition
       filter
@@ -127,7 +127,7 @@ ATOM
     def archive_unless_directed(options={})
       mark_as_read=options[:mark_read]
       tos=(options[:to] || me).to_a
-      filter = Filter.new(@britta).perform do
+      filter = Filter.new(@britta, :log => @log).perform do
         has_not [{:or => tos.map {|to| "to:#{to}"}}]
         archive
         if mark_as_read
