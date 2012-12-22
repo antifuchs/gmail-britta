@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "gmail-britta"
-  s.version = "0.1.2"
+  s.version = "0.1.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Andreas Fuchs"]
-  s.date = "2012-10-12"
+  s.date = "2012-12-22"
   s.description = "This gem helps create large (>50) gmail filter chains by writing xml compatible with gmail's \"import/export filters\" feature."
   s.email = "asf@boinkor.net"
   s.extra_rdoc_files = [
@@ -25,7 +25,11 @@ Gem::Specification.new do |s|
     "Rakefile",
     "VERSION",
     "gmail-britta.gemspec",
-    "lib/gmail-britta.rb"
+    "lib/gmail-britta.rb",
+    "lib/gmail-britta/delegate.rb",
+    "lib/gmail-britta/filter.rb",
+    "lib/gmail-britta/single_write_accessors.rb",
+    "test/test_gmail-britta.rb"
   ]
   s.homepage = "http://github.com/antifuchs/gmail-britta"
   s.licenses = ["MIT"]
@@ -40,24 +44,30 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<haml>, ["~> 3.1.6"])
       s.add_development_dependency(%q<shoulda>, [">= 0"])
       s.add_development_dependency(%q<rdoc>, ["~> 3.12"])
-      s.add_development_dependency(%q<bundler>, ["~> 1.1.0"])
+      s.add_development_dependency(%q<bundler>, ["~> 1.2.0"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.8.4"])
       s.add_development_dependency(%q<rcov>, [">= 0"])
+      s.add_development_dependency(%q<minitest>, [">= 0"])
+      s.add_development_dependency(%q<nokogiri>, [">= 0"])
     else
       s.add_dependency(%q<haml>, ["~> 3.1.6"])
       s.add_dependency(%q<shoulda>, [">= 0"])
       s.add_dependency(%q<rdoc>, ["~> 3.12"])
-      s.add_dependency(%q<bundler>, ["~> 1.1.0"])
+      s.add_dependency(%q<bundler>, ["~> 1.2.0"])
       s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
       s.add_dependency(%q<rcov>, [">= 0"])
+      s.add_dependency(%q<minitest>, [">= 0"])
+      s.add_dependency(%q<nokogiri>, [">= 0"])
     end
   else
     s.add_dependency(%q<haml>, ["~> 3.1.6"])
     s.add_dependency(%q<shoulda>, [">= 0"])
     s.add_dependency(%q<rdoc>, ["~> 3.12"])
-    s.add_dependency(%q<bundler>, ["~> 1.1.0"])
+    s.add_dependency(%q<bundler>, ["~> 1.2.0"])
     s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
     s.add_dependency(%q<rcov>, [">= 0"])
+    s.add_dependency(%q<minitest>, [">= 0"])
+    s.add_dependency(%q<nokogiri>, [">= 0"])
   end
 end
 
