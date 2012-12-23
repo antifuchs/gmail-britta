@@ -5,29 +5,30 @@
 
 Gem::Specification.new do |s|
   s.name = "gmail-britta"
-  s.version = "0.1.4"
+  s.version = "0.1.5"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Andreas Fuchs"]
-  s.date = "2012-12-22"
+  s.date = "2012-12-23"
   s.description = "This gem helps create large (>50) gmail filter chains by writing xml compatible with gmail's \"import/export filters\" feature."
   s.email = "asf@boinkor.net"
   s.extra_rdoc_files = [
     "LICENSE.txt",
-    "README.rdoc"
+    "README.md"
   ]
   s.files = [
     ".document",
+    ".yardopts",
     "Gemfile",
     "Gemfile.lock",
     "LICENSE.txt",
-    "README.rdoc",
+    "README.md",
     "Rakefile",
     "VERSION",
     "gmail-britta.gemspec",
     "lib/gmail-britta.rb",
-    "lib/gmail-britta/delegate.rb",
     "lib/gmail-britta/filter.rb",
+    "lib/gmail-britta/filter_set.rb",
     "lib/gmail-britta/single_write_accessors.rb",
     "test/test_gmail-britta.rb"
   ]
@@ -44,6 +45,8 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<haml>, ["~> 3.1.6"])
       s.add_development_dependency(%q<shoulda>, [">= 0"])
       s.add_development_dependency(%q<rdoc>, ["~> 3.12"])
+      s.add_development_dependency(%q<yard>, ["~> 0.8.3"])
+      s.add_development_dependency(%q<redcarpet>, ["~> 2.2.2"])
       s.add_development_dependency(%q<bundler>, ["~> 1.2.0"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.8.4"])
       s.add_development_dependency(%q<rcov>, [">= 0"])
@@ -53,6 +56,8 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<haml>, ["~> 3.1.6"])
       s.add_dependency(%q<shoulda>, [">= 0"])
       s.add_dependency(%q<rdoc>, ["~> 3.12"])
+      s.add_dependency(%q<yard>, ["~> 0.8.3"])
+      s.add_dependency(%q<redcarpet>, ["~> 2.2.2"])
       s.add_dependency(%q<bundler>, ["~> 1.2.0"])
       s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
       s.add_dependency(%q<rcov>, [">= 0"])
@@ -63,6 +68,8 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<haml>, ["~> 3.1.6"])
     s.add_dependency(%q<shoulda>, [">= 0"])
     s.add_dependency(%q<rdoc>, ["~> 3.12"])
+    s.add_dependency(%q<yard>, ["~> 0.8.3"])
+    s.add_dependency(%q<redcarpet>, ["~> 2.2.2"])
     s.add_dependency(%q<bundler>, ["~> 1.2.0"])
     s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
     s.add_dependency(%q<rcov>, [">= 0"])
