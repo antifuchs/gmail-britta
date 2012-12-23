@@ -42,12 +42,6 @@ end
 
 task :default => :test
 
-require 'rdoc/task'
-Rake::RDocTask.new do |rdoc|
-  version = File.exist?('VERSION') ? File.read('VERSION') : ""
+require 'yard'
 
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "gmail-britta #{version}"
-  rdoc.rdoc_files.include('README*')
-  rdoc.rdoc_files.include('lib/**/*.rb')
-end
+YARD::Rake::YardocTask.new

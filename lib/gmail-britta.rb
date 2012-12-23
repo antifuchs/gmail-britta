@@ -11,50 +11,22 @@ require 'haml'
 require 'logger'
 
 require 'gmail-britta/single_write_accessors'
-require 'gmail-britta/delegate'
+require 'gmail-britta/filter_set'
 require 'gmail-britta/filter'
 
+# # A generator DSL for importable gmail filter specifications.
+#
+# This is the main entry point for defining a filter set (multiple filters). See {.filterset} for details.
 module GmailBritta
-  class Britta
-    def initialize(opts={})
-      @filters = []
-      @me = opts[:me] || 'me'
-      @logger = opts[:logger] || allocate_logger
-    end
 
-    def allocate_logger
-      logger = Logger.new(STDERR)
-      logger.level = Logger::WARN
-      logger
-    end
-
-    attr_accessor :filters
-    attr_accessor :me
-    attr_accessor :logger
-
-    def rules(&block)
-      GmailBritta::Delegate.new(self, :logger => @logger).perform(&block)
-    end
-
-    def generate
-      engine = Haml::Engine.new(<<-ATOM)
-!!! XML
-%feed{:xmlns => 'http://www.w3.org/2005/Atom', 'xmlns:apps' => 'http://schemas.google.com/apps/2006'}
-  %title Mail Filters
-  %id tag:mail.google.com,2008:filters:
-  %updated #{Time.now.utc.iso8601}
-  %author
-    %name Andreas Fuchs
-    %email asf@boinkor.net
-  - filters.each do |filter|
-    != filter.generate_xml
-ATOM
-      engine.render(self)
-    end
-  end
-
+  # Create a {FilterSet} and run the filter set definition in the block.
+  # This is the main entry point for GmailBritta.
+  # @option opts :me [Array<String>] A list of email addresses that should be considered as belonging to "you", effectively those email addresses you would expect `to:me` to match.
+  # @option opts :logger [Logger] (Logger.new()) An initialized logger instance.
+  # @yield the filterset definition block. `self` inside the block is the {FilterSet} instance.
+  # @return [FilterSet] the constructed filterset
   def self.filterset(opts={}, &block)
-    (britta = Britta.new(opts)).rules(&block)
+    (britta = FilterSet.new(opts)).rules(&block)
     britta
   end
 end

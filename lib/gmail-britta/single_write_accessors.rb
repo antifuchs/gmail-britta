@@ -51,6 +51,7 @@ module GmailBritta
       end
     end
 
+    # @!visibility private
     def self.included(base)
       base.extend(ClassMethods)
     end
