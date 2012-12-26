@@ -162,6 +162,13 @@ gmail filter settings, and you'll label email from me and archive it
 unless I email you specifically. Not that useful, but with your own
 filters and the recipes above, you should be able to make it work (-:
 
+## Some general tips & tricks
+
+Here are some things to note when performing filter-fu with gmail:
+
+* A filter condition tops out at 1500 chars, apparently. This fits a decent amount of conditions, but something to be careful about. There is no check in gmail-britta against this, but Gmail will refuse to import (or drop) filters that violate this.
+* If you use `archive_unless_directed` heavily, you almost certainly want to check the "Don't override filters" box in Gmail's Inbox preferences.
+
 ## A short apology to you, dear code-diver
 
 A lot of this is a bit hacky (particularly the filter condition merge
