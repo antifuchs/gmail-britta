@@ -6,6 +6,7 @@ gem 'haml', '~> 3.1.6'
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
 group :development do
+  gem "rake", "~> 0.9.2"
   gem "shoulda", ">= 0"
   gem "rdoc", "~> 3.12"
   gem "yard", '~> 0.8.3'
