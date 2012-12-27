@@ -1,0 +1,7 @@
+source "http://rubygems.org"
+
+gem 'haml', '~> 3.1.6'
+
+gem "minitest"
+gem "shoulda", ">= 0"
+gem "nokogiri"
