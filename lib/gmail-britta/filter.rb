@@ -108,7 +108,7 @@ module GmailBritta
     # @return [Filter] the current (not the newly-constructed filter)
     def archive_unless_directed(options={})
       mark_as_read=options[:mark_read]
-      tos=(options[:to] || me).to_a
+      tos=Array(options[:to] || me)
       filter = Filter.new(@britta, :log => @log).perform do
         has_not [{:or => tos.map {|to| "to:#{to}"}}]
         archive
