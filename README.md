@@ -1,5 +1,7 @@
 # gmail-britta
 
+[![Build Status](https://travis-ci.org/antifuchs/gmail-britta.png?branch=master)](https://travis-ci.org/antifuchs/gmail-britta)
+
 This library helps you generate XML that you can import into gmail's
 filter settings. It makes it more pleasant to write simple (and even
 complex) filter chains.
