@@ -13,7 +13,6 @@ group :development do
   gem 'redcarpet', '~> 2.2.2'
   gem "bundler", "~> 1.2.0"
   gem "jeweler", "~> 1.8.4"
-  gem "rcov", ">= 0"
   gem "minitest"
   gem "nokogiri"
 end
