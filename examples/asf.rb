@@ -17,6 +17,7 @@ else
   TWITTER_TEST_EMAILS = %w{n-yhex=abcdefg.def-12345@postmaster.twitter.com}
   BANK_EMAILS = %w{info@bankofamerica.com}
   V_EMAILS=['from:someone_important@example.com', {:or => MY_EMAILS.map{|email| "to:#{email}"}}]
+  AMAZON_PACKAGE_TRACKING_EMAIL='amazon-package-tracker@example.com' # See https://github.com/antifuchs/amazon-autotracker
 end
 
 
@@ -100,6 +101,11 @@ puts(GmailBritta.filterset(:me => MY_EMAILS) do
     }.archive_unless_directed
 
     filter {
+      has %w{list:elixir-lang-core@googlegroups.com}
+      label 'elixir'
+    }.archive_unless_directed
+
+    filter {
       has [{:or => %w{list:discuss@lists.acemonstertoys.org list:amt-laserific@googlegroups.com
                       list:noisebridge-discuss@lists.noisebridge.net list:*@lists.metalab.at}}]
       label 'hackerspaces'
@@ -162,5 +168,10 @@ puts(GmailBritta.filterset(:me => MY_EMAILS) do
       label '_asf'
     }
 
+    filter {
+      has %w{from:ship-confirm@amazon.com}
+      label 'bulk/packages'
+      forward_to AMAZON_PACKAGE_TRACKING_EMAIL
+    }
 
   end.generate)
