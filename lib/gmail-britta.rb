@@ -170,7 +170,7 @@ ATOM
 
     def log_definition
       $log.debug  "Filter: #{self}"
-      Filter.single_write_accessors.each do |name|
+      Filter.single_write_accessors.keys.each do |name|
         val = instance_variable_get(Filter.ivar_name(name))
         $log.debug "  #{name}: #{val}" if val
       end
