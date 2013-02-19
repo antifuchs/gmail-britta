@@ -71,6 +71,10 @@ module GmailBritta
     single_write_accessor :has_not, 'doesNotHaveTheWord' do |list|
       emit_filter_spec(list)
     end
+
+    # Filter for messages that have an attachment
+    # @macro bool_dsl_method
+    single_write_boolean_accessor :has_attachment, 'hasAttachment'
     # @!endgroup
 
     # Register and return a new filter that matches only if this
