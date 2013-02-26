@@ -188,8 +188,17 @@ ATOM
       old_has = Marshal.load( Marshal.dump((filter.get_has || []).reject { |elt|
             @has.member?(elt)
           }))
+      old_from = Marshal.load( Marshal.dump((filter.get_from || []).reject { |elt|
+            @from.member?(elt)
+          }))
+      old_to = Marshal.load( Marshal.dump((filter.get_to || []).reject { |elt|
+            @to.member?(elt)
+          }))
+
       @log.debug("  M: oh  #{old_has.inspect}")
       @log.debug("  M: ohn #{old_has_not.inspect}")
+      @log.debug("  M: of #{old_from.inspect}")
+      @log.debug("  M: ot #{old_to.inspect}")
 
       @has_not ||= []
       @has_not += case
@@ -201,8 +210,16 @@ ATOM
                   else
                     old_has
                   end
-      @log.debug("  M: h #{@has.inspect}")
+
+      @from = (@from || []) + old_from.select{|a| a[0] == '-'}.map { |addr| addr[1..-1] }.compact
+      @from = (@from || []) + old_from.select{|a| a[0] != '-'}.map { |addr| '-' + addr }.compact
+      @to = (@to || []) + old_to.select{|a| a[0] == '-'}.map { |addr| addr[1..-1] }.compact
+      @to = (@to || []) + old_to.select{|a| a[0] != '-'}.map { |addr| '-' + addr }.compact
+
+      @log.debug("  M: nh #{@has.inspect}")
       @log.debug("  M: nhn #{@has_not.inspect}")
+      @log.debug("  M: nf #{@from.inspect}")
+      @log.debug("  M: nt #{@to.inspect}")
     end
 
     def merge_positive_criteria(filter)
