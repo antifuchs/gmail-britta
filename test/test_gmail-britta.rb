@@ -16,7 +16,7 @@ describe GmailBritta do
   end
 
   def dom(filterset)
-    text = simple_filterset.generate
+    text = filterset.generate
     #puts text
     Nokogiri::XML.parse(text)
   end
@@ -44,5 +44,18 @@ describe GmailBritta do
     assert_equal(2, filters.xpath('/a:feed/a:entry/apps:property[@name="hasTheWord"]',ns).length, "Should have exactly one 'has' property")
   end
 
+  describe "issues" do
+    it "doesn't fail issue #4 - correctly-parenthesised nested ANDs" do
+      fs = GmailBritta.filterset do
+        filter {
+          has :or => [['subject:whee', 'from:zot@spammer.com'], 'from:bob@bob.com', 'from:foo@foo.com']
+          label 'yay'
+        }
+      end
+      filters = dom(fs)
 
+      filter_text = filters.xpath('/a:feed/a:entry/apps:property[@name="hasTheWord"]',ns).first['value']
+      assert_equal('(subject:whee from:zot@spammer.com) OR from:bob@bob.com OR from:foo@foo.com', filter_text)
+    end
+  end
 end

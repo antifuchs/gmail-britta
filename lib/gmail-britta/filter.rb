@@ -194,7 +194,7 @@ ATOM
       @has_not = new_has_not
     end
 
-    def self.emit_filter_spec(filter, infix=' ')
+    def self.emit_filter_spec(filter, infix=' ', recursive=false)
       str = ''
       case filter
       when String
@@ -203,17 +203,16 @@ ATOM
         filter.keys.each do |key|
           case key
           when :or
-              str << '('
-            str << emit_filter_spec(filter[key], ' OR ')
-            str << ')'
+            str << emit_filter_spec(filter[key], ' OR ', recursive)
           when :not
-              str << '-('
-            str << emit_filter_spec(filter[key], ' ')
-            str << ')'
+            str << '-'
+            str << emit_filter_spec(filter[key], ' ', true)
           end
         end
       when Array
-        str << filter.map {|elt| emit_filter_spec(elt, ' ')}.join(infix)
+        str << '(' if recursive
+        str << filter.map {|elt| emit_filter_spec(elt, ' ', true)}.join(infix)
+        str << ')' if recursive
       end
       str
     end
