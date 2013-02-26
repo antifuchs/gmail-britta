@@ -65,6 +65,24 @@ module GmailBritta
       emit_filter_spec(list)
     end
 
+    # @!method from(conditions)
+    # @return [void]
+    # Defines the positive conditions for the filter to match.
+    # Uses: <apps:property name='from' value='postman@usps.gov'></apps:property>
+    # Instead of: <apps:property name='hasTheWord' value='from:postman@usps.gov'></apps:property>
+    single_write_accessor :from, 'from' do |list|
+      emit_filter_spec(list)
+    end
+
+    # @!method to(conditions)
+    # @return [void]
+    # Defines the positive conditions for the filter to match.
+    # Uses: <apps:property name='to' value='postman@usps.gov'></apps:property>
+    # Instead of: <apps:property name='hasTheWord' value='to:postman@usps.gov'></apps:property>
+    single_write_accessor :to, 'to' do |list|
+      emit_filter_spec(list)
+    end
+
     # @!method has_not(conditions)
     # @return [void]
     # Defines the negative conditions that must not match for the filter to be allowed to match.
