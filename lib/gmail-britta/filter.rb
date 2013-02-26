@@ -189,10 +189,10 @@ ATOM
             @has.member?(elt)
           }))
       old_from = Marshal.load( Marshal.dump((filter.get_from || []).reject { |elt|
-            @from.member?(elt)
+            (@from || []).member?(elt)
           }))
       old_to = Marshal.load( Marshal.dump((filter.get_to || []).reject { |elt|
-            @to.member?(elt)
+            (@to || []).member?(elt)
           }))
 
       @log.debug("  M: oh  #{old_has.inspect}")
@@ -215,6 +215,8 @@ ATOM
       @from = (@from || []) + old_from.select{|a| a[0] != '-'}.map { |addr| '-' + addr }.compact
       @to = (@to || []) + old_to.select{|a| a[0] == '-'}.map { |addr| addr[1..-1] }.compact
       @to = (@to || []) + old_to.select{|a| a[0] != '-'}.map { |addr| '-' + addr }.compact
+      @from = @from.empty? ? nil : @from
+      @to = @to.empty? ? nil : @to
 
       @log.debug("  M: nh #{@has.inspect}")
       @log.debug("  M: nhn #{@has_not.inspect}")
