@@ -1,11 +1,7 @@
 #!/usr/bin/env ruby
 
-begin
-  require File.join(File.dirname(__FILE__), '../lib/gmail-britta.rb')
-rescue
-  require 'bundler/setup'
-  require 'gmail-britta'
-end
+require 'bundler/setup'
+require 'gmail-britta'
 
 if File.exist?(File.expand_path("~/.gmail-britta.personal.rb"))
   require "~/.gmail-britta.personal.rb"
