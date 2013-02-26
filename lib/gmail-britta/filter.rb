@@ -183,10 +183,10 @@ ATOM
 
     def merge_negated_criteria(filter)
       old_has_not = Marshal.load(Marshal.dump((filter.get_has_not || []).reject { |elt|
-            @has.member?(elt)
+            (@has || []).member?(elt)
           }))
       old_has = Marshal.load( Marshal.dump((filter.get_has || []).reject { |elt|
-            @has.member?(elt)
+            (@has || []).member?(elt)
           }))
       old_from = Marshal.load( Marshal.dump((filter.get_from || []).reject { |elt|
             (@from || []).member?(elt)
