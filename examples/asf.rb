@@ -22,6 +22,7 @@ puts(GmailBritta.filterset(:me => MY_EMAILS) do
     filter {
       has ['subject:"moderator request"']
       label 'bulk/mailman'
+      smart_label 'notifications'
       archive
       mark_read
     }
@@ -29,6 +30,7 @@ puts(GmailBritta.filterset(:me => MY_EMAILS) do
     filter {
       has ['list:mailman@', 'subject:reminder']
       label 'bulk/mailman'
+      smart_label 'notifications'
       archive
       mark_read
     }
@@ -37,9 +39,11 @@ puts(GmailBritta.filterset(:me => MY_EMAILS) do
     filter {
       has %w{from:mailman subject:confirm}
       label 'bulk'
+      smart_label 'notifications'
     }.otherwise {
       has %w{from:mailman}
       label 'bulk'
+      smart_label 'notifications'
       archive
     }
 
@@ -48,63 +52,75 @@ puts(GmailBritta.filterset(:me => MY_EMAILS) do
       has %w{to:root}
       archive
       label 'bulk/admin'
+      smart_label 'notifications'
     }
 
     # Mailing lists I read:
     filter {
       has %w{list:mcclim-*@common-lisp.net}
       label 'lisp/McCLIM'
+      smart_label 'forums'
     }.archive_unless_directed.otherwise {
       has [{:or => %w{list:*@common-lisp.net list:summeroflisp-discuss@lispnyc.org}}]
       label 'lisp'
+      smart_label 'forums'
     }.archive_unless_directed
 
     filter {
       has [{:or => %w{list:sbcl-devel list:sbcl-help}}]
       never_spam
       label 'lisp/sbcl'
+      smart_label 'forums'
     }.archive_unless_directed
 
     filter {
       has %w{list:cclan-list@lists.sourceforge.net}
       never_spam
       label 'lisp/cclan'
+      smart_label 'forums'
     }.archive_unless_directed
 
     filter {
       has %w{list:openmcl-*}
       label 'lisp/clozure'
+      smart_label 'forums'
     }.archive_unless_directed
 
     filter {
       has %w{list:quicklisp@googlegroups.com}
       label 'lisp/quicklisp'
+      smart_label 'forums'
     }.archive_unless_directed
 
     filter {
       has [{:or => %w{list:thingiverse@googlegroups.com list:replicatorg-dev@googlegroups.com}}]
       label 'thingiverse'
+      smart_label 'forums'
     }.archive_unless_directed
 
     filter {
       has %w{list:openscad@rocklinux.org}
       label 'thingiverse'
+      smart_label 'forums'
     }.archive_unless_directed
 
     filter {
       has %w{list:emacs-orgmode@gnu.org}
       label 'orgmode'
+      smart_label 'forums'
     }.archive_unless_directed
 
     filter {
       has %w{list:elixir-lang-core@googlegroups.com}
       label 'elixir'
+      smart_label 'forums'
     }.archive_unless_directed
 
     filter {
       has [{:or => %w{list:discuss@lists.acemonstertoys.org list:amt-laserific@googlegroups.com
                       list:noisebridge-discuss@lists.noisebridge.net list:*@lists.metalab.at}}]
       label 'hackerspaces'
+      smart_label 'forums'
     }.archive_unless_directed
 
     # Stuff from the bank:
@@ -130,16 +146,20 @@ puts(GmailBritta.filterset(:me => MY_EMAILS) do
     filter {
       has [FB_EMAIL, {:or => ['subject:"added you as a friend"', 'subject:"sent you a message"', 'subject:"changed the time"']}]
       label 'bulk/fb'
+      smart_label 'social'
     }.otherwise {
       has [FB_EMAIL]
       label 'bulk/fb'
+      smart_label 'social'
       archive
     }.otherwise {
       has TWITTER_EMAILS + [{:or => ['subject:"is now following"', 'subject:"direct message"']}]
       label 'bulk/twitter'
+      smart_label 'social'
     }.otherwise {
       has [{:or => TWITTER_EMAILS + TWITTER_TEST_EMAILS}]
       label 'bulk/twitter'
+      smart_label 'social'
       archive
       mark_read
     }.otherwise {
@@ -158,6 +178,7 @@ puts(GmailBritta.filterset(:me => MY_EMAILS) do
       has [{:or => "from:(#{bacon_senders.join("|")})"}]
       archive
       label 'bulk'
+      smart_label 'notifications'
     }.otherwise {
       to_me = me.map {|address| "to:#{address}"}
       has [{:or => to_me}]
@@ -167,6 +188,7 @@ puts(GmailBritta.filterset(:me => MY_EMAILS) do
     filter {
       has %w{from:ship-confirm@amazon.com}
       label 'bulk/packages'
+      smart_label 'notifications'
       forward_to AMAZON_PACKAGE_TRACKING_EMAIL
     }
 
