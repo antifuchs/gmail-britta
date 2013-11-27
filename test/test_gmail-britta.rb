@@ -58,4 +58,33 @@ describe GmailBritta do
       assert_equal('(subject:whee from:zot@spammer.com) OR from:bob@bob.com OR from:foo@foo.com', filter_text)
     end
   end
+
+  describe "subject" do
+    it "works with single subject" do
+      fs = GmailBritta.filterset do
+        filter {
+          subject 'SPAM: '
+          label 'important'
+        }
+      end
+
+      filters = dom(fs)
+
+      filter_text = filters.xpath('//apps:property[@name="subject"]', ns).first['value']
+      assert_equal('SPAM: ', filter_text)
+    end
+
+    it "works with hash of subjects" do
+      fs = GmailBritta.filterset do
+        filter {
+          subject :or => ['SPAM', 'HAM']
+        }
+      end
+
+      filters = dom(fs)
+
+      filter_text = filters.xpath('//apps:property[@name="subject"]', ns).first['value']
+      assert_equal('SPAM OR HAM', filter_text)
+    end
+  end
 end
