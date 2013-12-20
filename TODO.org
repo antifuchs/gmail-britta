@@ -4,6 +4,9 @@
 * TODO Finalization model for single-filter definition
   Allow defining multible conditions, actions in the filter body. Then
   at the end of the block finalize into filter object & register that.
+*** Bonus points: Filter chain subclasses
+    This would make it much easier to reason about / test filter
+    negation & stuff like archive_unless_directed.
 * TODO Check for maximum length of filter conditions
 * TODO Avoid emitting empty filters if there is a .archive_unless_directed
 * TODO Maybe a more convenient has/has_not criteria format?
@@ -14,3 +17,6 @@
   #+END_SRC
   Might also make it easier to optimize filter expressions for length
   (but how to specify OR? Guess this is for a version 1.0/2.0)
+* TODO Extract my personal filters from this repo
+  While it's neat that I can keep them in here, I should just make a
+  separate repo for them.
