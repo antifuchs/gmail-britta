@@ -128,7 +128,12 @@ puts(GmailBritta.filterset(:me => MY_EMAILS) do
     }.archive_unless_directed
 
     filter {
-      has [FB_EMAIL, {:or => ['subject:"added you as a friend"', 'subject:"sent you a message"', 'subject:"changed the time"']}]
+      has %w{notifications@github.com}
+      label 'open-source'
+    }
+
+    filter {
+      has [FB_EMAIL, {:or => ['subject:"added you as a friend"', 'subject:"new messages from"', 'subject:"new message from"', 'subject:"changed the time"']}]
       label 'bulk/fb'
     }.otherwise {
       has [FB_EMAIL]
@@ -165,7 +170,7 @@ puts(GmailBritta.filterset(:me => MY_EMAILS) do
     }
 
     filter {
-      has %w{from:ship-confirm@amazon.com}
+      has [{:or => ['from:ship-confirm@amazon.com', 'from:auto-confirm@amazon.com', 'subject:"shipped"', '"tracking number"']}]
       label 'bulk/packages'
       forward_to AMAZON_PACKAGE_TRACKING_EMAIL
     }
