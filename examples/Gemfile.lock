@@ -1,13 +1,13 @@
 PATH
   remote: ../
   specs:
-    gmail-britta (0.1.5)
+    gmail-britta (0.1.6)
       haml (~> 3.1.6)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    haml (3.1.7)
+    haml (3.1.8)
 
 PLATFORMS
   ruby
