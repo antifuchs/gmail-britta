@@ -77,14 +77,15 @@ module GmailBritta
     single_write_boolean_accessor :has_attachment, 'hasAttachment'
     # @!endgroup
 
+    #@!group Filter chaining
+
     # Register and return a new filter that matches only if this
-    # filter's conditions (those that are not duplicated on the new
-    # filter's `has` clause) do not match.
+    # Filter's conditions (those that are not duplicated on the new
+    # Filter's {#has} clause) *do not* match.
     # @yield The filter definition block
     # @return [Filter] the new filter
     def otherwise(&block)
-      filter = Filter.new(@britta, :log => @log).perform(&block)
-      filter.merge_negated_criteria(self)
+      filter = NegativeChainingFilter.new(self).perform(&block)
       filter.log_definition
       filter
     end
@@ -95,8 +96,7 @@ module GmailBritta
     # @yield The filter definition block
     # @return [Filter] the new filter
     def also(&block)
-      filter = Filter.new(@britta, :log => @log).perform(&block)
-      filter.merge_positive_criteria(self)
+      filter = PositiveChainingFilter.new(self).perform(&block)
       filter.log_definition
       filter
     end
@@ -105,28 +105,30 @@ module GmailBritta
     # unless it matches the `:to` email addresses. Optionally, mark
     # the message as read if this filter matches.
     #
-    # @note This method returns the previous filter to make it easier to construct filter chains with {#otherwise} and {#also}.
+    # @note This method returns the previous filter to make it easier
+    #   to construct filter chains with {#otherwise} and {#also}
+    #   with {#archive_unless_directed} in the middle.
     #
     # @option options [true, false] :mark_read If true, mark the message as read
     # @option options [Array<String>] :to a list of addresses that the message may be addressed to in order to prevent this filter from matching. Defaults to the value given to :me on {GmailBritta.filterset}.
-    # @return [Filter] the current (not the newly-constructed filter)
+    # @return [Filter] `self` (not the newly-constructed filter)
     def archive_unless_directed(options={})
       mark_as_read=options[:mark_read]
       tos=Array(options[:to] || me)
-      filter = Filter.new(@britta, :log => @log).perform do
+      filter = PositiveChainingFilter.new(self).perform do
         has_not [{:or => tos.map {|to| "to:#{to}"}}]
         archive
         if mark_as_read
           mark_read
         end
       end
-      filter.merge_positive_criteria(self)
       filter.log_definition
       self
     end
+    #@!endgroup
 
     # Create a new filter object
-    # @note Over the lifetime of {GmailBritta}, new {Filter}s usually get created only by the {Delegate}.
+    # @note Over the lifetime of {GmailBritta}, new {Filter}s usually get created only by the {FilterSet::Delegate}.
     # @param [GmailBritta::Britta] britta the filterset object
     # @option options :log [Logger] a logger for debug messages
     def initialize(britta, options={})
@@ -162,37 +164,9 @@ ATOM
     end
 
     protected
+    def filterset; @britta; end
 
-    def merge_negated_criteria(filter)
-      old_has_not = Marshal.load(Marshal.dump((filter.get_has_not || []).reject { |elt|
-            @has.member?(elt)
-          }))
-      old_has = Marshal.load( Marshal.dump((filter.get_has || []).reject { |elt|
-            @has.member?(elt)
-          }))
-      @log.debug("  M: oh  #{old_has.inspect}")
-      @log.debug("  M: ohn #{old_has_not.inspect}")
-
-      @has_not ||= []
-      @has_not += case
-                  when old_has_not.first.is_a?(Hash) && old_has_not.first[:or]
-                    old_has_not.first[:or] += old_has
-                    old_has_not
-                  when old_has_not.length > 0
-                    [{:or => old_has_not + old_has}]
-                  else
-                    old_has
-                  end
-      @log.debug("  M: h #{@has.inspect}")
-      @log.debug("  M: nhn #{@has_not.inspect}")
-    end
-
-    def merge_positive_criteria(filter)
-      new_has = (@has || []) + (filter.get_has || [])
-      new_has_not = (@has_not || []) + (filter.get_has_not || [])
-      @has = new_has
-      @has_not = new_has_not
-    end
+    def logger; @log ; end
 
     def self.emit_filter_spec(filter, infix=' ', recursive=false)
       str = ''
@@ -223,7 +197,7 @@ ATOM
       return unless @log.debug?
       @log.debug  "Filter: #{self}"
       Filter.single_write_accessors.each do |name, gmail_name|
-        val = instance_variable_get(Filter.ivar_name(name))
+        val = send(:"get_#{name}")
         @log.debug "  #{name}: #{val}" if val
       end
       self
