@@ -144,12 +144,12 @@ module GmailBritta
   %title Mail Filter
   %content
 #{generate_haml_properties 1}
-")
+", :attr_wrapper => '"')
       engine.render(self)
     end
 
     def generate_xml_properties
-      engine = Haml::Engine.new(generate_haml_properties)
+      engine = Haml::Engine.new(generate_haml_properties, :attr_wrapper => '"')
       engine.render(self)
     end
 
