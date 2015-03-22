@@ -65,6 +65,24 @@ module GmailBritta
       emit_filter_spec(list)
     end
 
+    # @!method from(conditions)
+    # @return [void]
+    # Defines the positive conditions for the filter to match.
+    # Uses: <apps:property name='from' value='postman@usps.gov'></apps:property>
+    # Instead of: <apps:property name='hasTheWord' value='from:postman@usps.gov'></apps:property>
+    single_write_accessor :from, 'from' do |list|
+      emit_filter_spec(list)
+    end
+
+    # @!method to(conditions)
+    # @return [void]
+    # Defines the positive conditions for the filter to match.
+    # Uses: <apps:property name='to' value='postman@usps.gov'></apps:property>
+    # Instead of: <apps:property name='hasTheWord' value='to:postman@usps.gov'></apps:property>
+    single_write_accessor :to, 'to' do |list|
+      emit_filter_spec(list)
+    end
+
     # @!method has_not(conditions)
     # @return [void]
     # Defines the negative conditions that must not match for the filter to be allowed to match.
@@ -165,13 +183,22 @@ ATOM
 
     def merge_negated_criteria(filter)
       old_has_not = Marshal.load(Marshal.dump((filter.get_has_not || []).reject { |elt|
-            @has.member?(elt)
+            (@has || []).member?(elt)
           }))
       old_has = Marshal.load( Marshal.dump((filter.get_has || []).reject { |elt|
-            @has.member?(elt)
+            (@has || []).member?(elt)
           }))
+      old_from = Marshal.load( Marshal.dump((filter.get_from || []).reject { |elt|
+            (@from || []).member?(elt)
+          }))
+      old_to = Marshal.load( Marshal.dump((filter.get_to || []).reject { |elt|
+            (@to || []).member?(elt)
+          }))
+
       @log.debug("  M: oh  #{old_has.inspect}")
       @log.debug("  M: ohn #{old_has_not.inspect}")
+      @log.debug("  M: of #{old_from.inspect}")
+      @log.debug("  M: ot #{old_to.inspect}")
 
       @has_not ||= []
       @has_not += case
@@ -183,8 +210,18 @@ ATOM
                   else
                     old_has
                   end
-      @log.debug("  M: h #{@has.inspect}")
+
+      @from = (@from || []) + old_from.select{|a| a[0] == '-'}.map { |addr| addr[1..-1] }.compact
+      @from = (@from || []) + old_from.select{|a| a[0] != '-'}.map { |addr| '-' + addr }.compact
+      @to = (@to || []) + old_to.select{|a| a[0] == '-'}.map { |addr| addr[1..-1] }.compact
+      @to = (@to || []) + old_to.select{|a| a[0] != '-'}.map { |addr| '-' + addr }.compact
+      @from = @from.empty? ? nil : @from
+      @to = @to.empty? ? nil : @to
+
+      @log.debug("  M: nh #{@has.inspect}")
       @log.debug("  M: nhn #{@has_not.inspect}")
+      @log.debug("  M: nf #{@from.inspect}")
+      @log.debug("  M: nt #{@to.inspect}")
     end
 
     def merge_positive_criteria(filter)
