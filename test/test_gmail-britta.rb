@@ -31,6 +31,36 @@ describe GmailBritta do
     assert(filters.is_a?(String), "Generated filters should be a string")
   end
 
+  it "generates 'label' properties" do
+    fs = GmailBritta.filterset() do
+      filter {
+          has 'to:asf@boinkor.net'
+          label 'ohai'
+      }
+    end
+
+    filters = dom(fs)
+    assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="label"]',ns).length, "Should have exactly one 'label' property")
+  end
+
+  it "also generates 'smartLabelToApply' properties" do
+    fs = GmailBritta.filterset() do
+      filter {
+          has 'to:asf@boinkor.net'
+          label 'ohai'
+          smart_label 'forums'
+      }
+    end
+
+    filters = dom(fs)
+    assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="label"]',ns).length, "Should have exactly one 'label' property")
+
+    smart_labels = filters.xpath('/a:feed/a:entry/apps:property[@name="smartLabelToApply"]',ns)
+    assert_equal(1, smart_labels.length, "Should have exactly one 'smartLabelToApply' property")
+    smart_label_value = smart_labels.first['value']
+    assert_equal('^smartlabel_group', smart_label_value, "Should use the smartlabel_ value")
+  end
+
   it "generates simple 'has' condition xml" do
     filters = dom(
       GmailBritta.filterset() do

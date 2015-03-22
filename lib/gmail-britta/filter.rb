@@ -46,6 +46,25 @@ module GmailBritta
     # @param [String] label the label to assign the message
     single_write_accessor :label, 'label'
 
+    # Assign the given smart label to the message
+    # @return [void]
+    # @!method smart_label(category)
+    # @param [String] category the smart label to assign the message
+    single_write_accessor :smart_label, 'smartLabelToApply' do |category|
+      case category
+      when 'forums', 'Forums'
+        '^smartlabel_group'
+      when 'notifications', 'Notifications', 'updates', 'Updates'
+        '^smartlabel_notification'
+      when 'promotions', 'Promotions'
+        '^smartlabel_promo'
+      when 'social', 'Social'
+        '^smartlabel_social'
+      else
+        raise 'invalid category "' << category << '"'
+      end
+    end
+
     # Forward the message to the given label.
     # @return [void]
     # @!method forward_to(email)
