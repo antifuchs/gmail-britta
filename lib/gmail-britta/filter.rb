@@ -187,7 +187,7 @@ module GmailBritta
     # Return the filter's value as XML text.
     # @return [String] the Atom XML representation of this filter
     def generate_xml
-      properties = generate_xml_properties
+      generate_xml_properties
       engine = Haml::Engine.new("
 %entry
   %category{:term => 'filter'}
