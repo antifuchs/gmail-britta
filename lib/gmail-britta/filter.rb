@@ -101,6 +101,19 @@ module GmailBritta
     single_write_accessor :to, 'to' do |list|
       emit_filter_spec(list)
     end
+    #
+    # @!method subject(conditions)
+    # @return [void]
+    # Defines the positive conditions for the filter to match.
+    # @overload subject([conditions])
+    #   Conditions ANDed together that an incoming email must match.
+    #   @param [Array<conditions>] conditions a list of gmail search terms, all of which must match
+    # @overload subject({:or => [conditions]})
+    #   Conditions ORed together for the filter to match
+    #   @param [{:or => conditions}] conditions a hash of the form `{:or => [condition1, condition2]}` - either of these conditions must match to match the filter.
+    single_write_accessor :subject, 'subject' do |list|
+      emit_filter_spec(list)
+    end
 
     # @!method has_not(conditions)
     # @return [void]

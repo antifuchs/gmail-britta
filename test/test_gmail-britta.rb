@@ -154,4 +154,32 @@ describe GmailBritta do
     assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@value="-asf@boinkor.net -abc@boinkor.net"]',ns).length, "Should have both addresses negated in one 'from' property")
   end
 
+  describe "subject" do
+    it "works with single subject" do
+      fs = GmailBritta.filterset do
+        filter {
+          subject 'SPAM: '
+          label 'important'
+        }
+      end
+
+      filters = dom(fs)
+
+      filter_text = filters.xpath('//apps:property[@name="subject"]', ns).first['value']
+      assert_equal('SPAM: ', filter_text)
+    end
+
+    it "works with hash of subjects" do
+      fs = GmailBritta.filterset do
+        filter {
+          subject :or => ['SPAM', 'HAM']
+        }
+      end
+
+      filters = dom(fs)
+
+      filter_text = filters.xpath('//apps:property[@name="subject"]', ns).first['value']
+      assert_equal('SPAM OR HAM', filter_text)
+    end
+  end
 end
