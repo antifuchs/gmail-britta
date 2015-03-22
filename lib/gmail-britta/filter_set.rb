@@ -4,6 +4,9 @@ module GmailBritta
       @filters = []
       @me = opts[:me] || 'me'
       @logger = opts[:logger] || allocate_logger
+      @author = opts[:author] || {}
+      @author[:name] ||= "Andreas Fuchs"
+      @author[:email] ||= "asf@boinkor.net"
     end
 
     # Currently defined filters
@@ -38,8 +41,8 @@ module GmailBritta
   %id tag:mail.google.com,2008:filters:
   %updated #{Time.now.utc.iso8601}
   %author
-    %name Andreas Fuchs
-    %email asf@boinkor.net
+    %name #{@author[:name]}
+    %email #{@author[:email]}
   - filters.each do |filter|
     != filter.generate_xml
 ATOM
