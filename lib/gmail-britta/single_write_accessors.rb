@@ -13,7 +13,7 @@ module GmailBritta
         single_write_accessors[name] = gmail_name
         ivar_name = self.ivar_name(name)
         define_method(name) do |words|
-          if instance_variable_get(ivar_name)
+          if instance_variable_get(ivar_name) and instance_variable_get(ivar_name) != []
             raise "Only one use of #{name} is permitted per filter"
           end
           instance_variable_set(ivar_name, words)
@@ -23,7 +23,7 @@ module GmailBritta
         end
         if block_given?
           define_method("output_#{name}") do
-            instance_variable_get(ivar_name) && block.call(instance_variable_get(ivar_name))
+            instance_variable_get(ivar_name) && block.call(instance_variable_get(ivar_name)) unless instance_variable_get(ivar_name) == []
           end
         else
           define_method("output_#{name}") do
