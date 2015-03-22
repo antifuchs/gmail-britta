@@ -7,7 +7,7 @@ require 'gmail-britta'
 
 describe GmailBritta do
   def simple_filterset
-    fs = GmailBritta.filterset() do
+    GmailBritta.filterset() do
       filter {
         has %w{to:asf@boinkor.net}
         label 'ohai'
