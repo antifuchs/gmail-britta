@@ -101,7 +101,7 @@ module GmailBritta
     single_write_accessor :to, 'to' do |list|
       emit_filter_spec(list)
     end
-    #
+
     # @!method subject(conditions)
     # @return [void]
     # Defines the positive conditions for the filter to match.
