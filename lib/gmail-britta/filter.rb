@@ -187,16 +187,19 @@ module GmailBritta
     # Return the filter's value as XML text.
     # @return [String] the Atom XML representation of this filter
     def generate_xml
-      engine = Haml::Engine.new(<<-ATOM)
+      properties = generate_xml_properties
+      engine = Haml::Engine.new("
 %entry
   %category{:term => 'filter'}
   %title Mail Filter
   %content
-  - self.class.single_write_accessors.keys.each do |name|
-    - gmail_name = self.class.single_write_accessors[name]
-    - if value = self.send("output_\#{name}".intern)
-      %apps:property{:name => gmail_name, :value => value.to_s}
-ATOM
+#{generate_haml_properties 1}
+", :attr_wrapper => '"')
+      engine.render(self)
+    end
+
+    def generate_xml_properties
+      engine = Haml::Engine.new(generate_haml_properties, :attr_wrapper => '"')
       engine.render(self)
     end
 
@@ -301,6 +304,21 @@ ATOM
     # Return the list of emails that the filterset has configured as "me".
     def me
       @britta.me
+    end
+
+    private
+
+    def generate_haml_properties(indent=0)
+      properties =
+"- self.class.single_write_accessors.keys.each do |name|
+  - gmail_name = self.class.single_write_accessors[name]
+  - if value = self.send(\"output_\#{name}\".intern)
+    %apps:property{:name => gmail_name, :value => value.to_s}"
+      if (indent)
+        indent_sp = ' '*indent*2
+        properties = indent_sp + properties.split("\n").join("\n" + indent_sp)
+      end
+      properties
     end
   end
 end
