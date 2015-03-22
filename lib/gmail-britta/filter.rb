@@ -294,7 +294,7 @@ module GmailBritta
     def log_definition
       return unless @log.debug?
       @log.debug  "Filter: #{self}"
-      Filter.single_write_accessors.each do |name, gmail_name|
+      Filter.single_write_accessors.keys.each do |name, gmail_name|
         val = instance_variable_get(Filter.ivar_name(name))
         @log.debug "  #{name}: #{val}" if val
       end
