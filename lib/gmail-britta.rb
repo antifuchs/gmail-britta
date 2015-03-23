@@ -13,6 +13,7 @@ require 'logger'
 require 'gmail-britta/single_write_accessors'
 require 'gmail-britta/filter_set'
 require 'gmail-britta/filter'
+require 'gmail-britta/chaining_filter'
 
 # # A generator DSL for importable gmail filter specifications.
 #
