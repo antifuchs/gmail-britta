@@ -29,17 +29,13 @@ module GmailBritta
           end
           instance_variable_set(ivar, words)
         end
-        define_method("get_#{name}") do
-          instance_variable_get(ivar)
-        end
+        get(name, ivar)
         if block_given?
           define_method("output_#{name}") do
             instance_variable_get(ivar) && block.call(instance_variable_get(ivar)) unless instance_variable_get(ivar) == []
           end
         else
-          define_method("output_#{name}") do
-            instance_variable_get(ivar)
-          end
+          output(name, ivar)
         end
       end
 
@@ -61,18 +57,26 @@ module GmailBritta
           end
           instance_variable_set(ivar, value)
         end
-        define_method("get_#{name}") do
-          instance_variable_get(ivar)
-        end
-        define_method("output_#{name}") do
-          instance_variable_get(ivar)
-        end
+        get(name, ivar)
+        output(name, ivar)
       end
 
 
       private
       def ivar_name(name)
         :"@#{name}"
+      end
+
+      def get(name, ivar)
+        define_method("get_#{name}") do
+          instance_variable_get(ivar)
+        end
+      end
+
+      def output(name, ivar)
+        define_method("output_#{name}") do
+          instance_variable_get(ivar)
+        end
       end
 
       def direct_single_write_accessors
