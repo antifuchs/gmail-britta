@@ -238,6 +238,8 @@ module GmailBritta
           case key
           when :or
             infix = ' OR '
+          when :and
+            infix = ' AND '
           when :not
             prefix = '-'
             recursive = true
