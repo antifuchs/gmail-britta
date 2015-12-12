@@ -96,6 +96,32 @@ describe GmailBritta do
     assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@value="asf@boinkor.net"]',ns).length, "Should have exactly one 'from' value")
   end
 
+  it "generates an error for multiple accessors" do
+    err = assert_raises RuntimeError do
+      GmailBritta.filterset() do
+        filter {
+          from %w{asf@boinkor.net}
+          from %w{asf@boinkor.net}
+          label 'ohai'
+        }
+      end
+    end
+    assert_equal('Only one use of from is permitted per filter', err.message)
+  end
+
+  it "generates an error for multiple boolean accessors" do
+    err = assert_raises RuntimeError do
+      GmailBritta.filterset() do
+        filter {
+          from %w{asf@boinkor.net}
+          archive
+          archive
+        }
+      end
+    end
+    assert_equal('Only one use of archive is permitted per filter', err.message)
+  end
+
   it "generates multiple 'from' condition xml" do
     filters = dom(
       GmailBritta.filterset() do
