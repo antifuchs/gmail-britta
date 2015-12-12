@@ -47,21 +47,48 @@ describe GmailBritta do
   end
 
   it "also generates 'smartLabelToApply' properties" do
-    fs = GmailBritta.filterset() do
-      filter {
+    groups = {
+      'forums' => :group,
+      'Forums' => :group,
+      'notifications' => :notification,
+      'Notifications' => :notification,
+      'updates' => :notification,
+      'Updates' => :notification,
+      'promotions' => :promo,
+      'Promotions' => :promo,
+      'social' => :social,
+      'Social' => :social
+    }
+
+    groups.each do |key, value|
+      fs = GmailBritta.filterset() do
+        filter {
           has 'to:asf@boinkor.net'
           label 'ohai'
-          smart_label 'forums'
-      }
+          smart_label key
+        }
+      end
+
+      filters = dom(fs)
+      assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="label"]',ns).length, "Should have exactly one 'label' property")
+
+      smart_labels = filters.xpath('/a:feed/a:entry/apps:property[@name="smartLabelToApply"]',ns)
+      assert_equal(1, smart_labels.length, "Should have exactly one 'smartLabelToApply' property")
+      smart_label_value = smart_labels.first['value']
+      assert_equal("^smartlabel_#{value}", smart_label_value, "Should use the smartlabel_ value")
     end
 
-    filters = dom(fs)
-    assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="label"]',ns).length, "Should have exactly one 'label' property")
-
-    smart_labels = filters.xpath('/a:feed/a:entry/apps:property[@name="smartLabelToApply"]',ns)
-    assert_equal(1, smart_labels.length, "Should have exactly one 'smartLabelToApply' property")
-    smart_label_value = smart_labels.first['value']
-    assert_equal('^smartlabel_group', smart_label_value, "Should use the smartlabel_ value")
+    err = assert_raises RuntimeError do
+      fs = GmailBritta.filterset() do
+        filter {
+          has 'to:asf@boinkor.net'
+          label 'ohai'
+          smart_label 'Foobar'
+        }
+      end
+      dom(fs)
+    end
+    assert_equal('invalid category "Foobar"', err.message)
   end
 
   it "generates simple 'has' condition xml" do
