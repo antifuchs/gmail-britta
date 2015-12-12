@@ -82,6 +82,24 @@ describe GmailBritta do
     assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="hasTheWord"]',ns).length, "Should have exactly one 'has' property")
   end
 
+  it "generates simple 'has_not' condition xml" do
+    filters = dom(
+      GmailBritta.filterset() do
+        filter {
+          has_not %w{to:asf@boinkor.net}
+          label 'ohai'
+          archive
+        }
+      end
+    )
+
+    assert_equal(1, filters.xpath('/a:feed/a:entry',ns).length, "Should have exactly one filter entry")
+    assert_equal(3, filters.xpath('/a:feed/a:entry/apps:property',ns).length, "Should have two properties")
+    assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="label"]',ns).length, "Should have exactly one 'label' property")
+    assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="shouldArchive"]',ns).length, "Should have exactly one 'shouldArchive' property")
+    assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="doesNotHaveTheWord"]',ns).length, "Should have exactly one 'has_not' property")
+  end
+
   it "generates simple 'from' condition xml" do
     filters = dom(
       GmailBritta.filterset() do
