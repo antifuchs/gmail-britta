@@ -127,6 +127,22 @@ describe GmailBritta do
     assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@value="-asf@boinkor.net"]',ns).length, "Should have the address negatively exactly once")
   end
 
+  it "uses .also for single 'to' condition" do
+    filters = dom(
+      GmailBritta.filterset() do
+        filter {
+          from %w{from@boinkor.net}
+          label 'ohai'
+        }.also {
+          to %w{to@boinkor.net}
+        }
+      end
+    )
+
+    assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="from"][@value="from@boinkor.net"]',ns).length, "Should have the from address")
+    assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="to"][@value="to@boinkor.net"]',ns).length, "Should have the to address")
+  end
+
   it "doesn't fail issue #4 - correctly-parenthesised nested ANDs" do
     fs = GmailBritta.filterset do
       filter {
