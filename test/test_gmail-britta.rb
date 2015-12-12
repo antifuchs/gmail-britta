@@ -214,6 +214,20 @@ describe GmailBritta do
     assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="to"][@value="to@boinkor.net"]',ns).length, "Should have the to address")
   end
 
+  it "understands me" do
+    fs = GmailBritta.filterset(:me => ['thisisme@my-private.org', 'this-is-me@bigco.example.com']) do
+      filter {
+        to_me = me.map {|address| "to:#{address}"}
+        has [{:or => to_me}]
+      }
+    end
+    filters = dom(fs)
+
+    filter_text = filters.xpath('/a:feed/a:entry/apps:property[@name="hasTheWord"]',ns).first['value']
+    assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="hasTheWord"]',ns).length, "Should have exactly one 'has' property")
+    assert_equal('(to:thisisme@my-private.org OR to:this-is-me@bigco.example.com)', filter_text, "Should have exactly one 'has' property")
+  end
+
   it "doesn't fail issue #4 - correctly-parenthesised nested ANDs" do
     fs = GmailBritta.filterset do
       filter {
