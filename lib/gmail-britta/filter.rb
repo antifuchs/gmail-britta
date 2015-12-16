@@ -46,6 +46,25 @@ module GmailBritta
     # @param [String] label the label to assign the message
     single_write_accessor :label, 'label'
 
+    # Assign the given smart label to the message
+    # @return [void]
+    # @!method smart_label(category)
+    # @param [String] category the smart label to assign the message
+    single_write_accessor :smart_label, 'smartLabelToApply' do |category|
+      case category
+      when 'forums', 'Forums'
+        '^smartlabel_group'
+      when 'notifications', 'Notifications', 'updates', 'Updates'
+        '^smartlabel_notification'
+      when 'promotions', 'Promotions'
+        '^smartlabel_promo'
+      when 'social', 'Social'
+        '^smartlabel_social'
+      else
+        raise 'invalid category "' << category << '"'
+      end
+    end
+
     # Forward the message to the given label.
     # @return [void]
     # @!method forward_to(email)
@@ -65,6 +84,37 @@ module GmailBritta
       emit_filter_spec(list)
     end
 
+    # @!method from(conditions)
+    # @return [void]
+    # Defines the positive conditions for the filter to match.
+    # Uses: <apps:property name='from' value='postman@usps.gov'></apps:property>
+    # Instead of: <apps:property name='hasTheWord' value='from:postman@usps.gov'></apps:property>
+    single_write_accessor :from, 'from' do |list|
+      emit_filter_spec(list)
+    end
+
+    # @!method to(conditions)
+    # @return [void]
+    # Defines the positive conditions for the filter to match.
+    # Uses: <apps:property name='to' value='postman@usps.gov'></apps:property>
+    # Instead of: <apps:property name='hasTheWord' value='to:postman@usps.gov'></apps:property>
+    single_write_accessor :to, 'to' do |list|
+      emit_filter_spec(list)
+    end
+
+    # @!method subject(conditions)
+    # @return [void]
+    # Defines the positive conditions for the filter to match.
+    # @overload subject([conditions])
+    #   Conditions ANDed together that an incoming email must match.
+    #   @param [Array<conditions>] conditions a list of gmail search terms, all of which must match
+    # @overload subject({:or => [conditions]})
+    #   Conditions ORed together for the filter to match
+    #   @param [{:or => conditions}] conditions a hash of the form `{:or => [condition1, condition2]}` - either of these conditions must match to match the filter.
+    single_write_accessor :subject, 'subject' do |list|
+      emit_filter_spec(list)
+    end
+
     # @!method has_not(conditions)
     # @return [void]
     # Defines the negative conditions that must not match for the filter to be allowed to match.
@@ -77,16 +127,20 @@ module GmailBritta
     single_write_boolean_accessor :has_attachment, 'hasAttachment'
     # @!endgroup
 
+    #@!group Filter chaining
+    def chain(type, &block)
+      filter = type.new(self).perform(&block)
+      filter.log_definition
+      filter
+    end
+
     # Register and return a new filter that matches only if this
-    # filter's conditions (those that are not duplicated on the new
-    # filter's `has` clause) do not match.
+    # Filter's conditions (those that are not duplicated on the new
+    # Filter's {#has} clause) *do not* match.
     # @yield The filter definition block
     # @return [Filter] the new filter
     def otherwise(&block)
-      filter = Filter.new(@britta, :log => @log).perform(&block)
-      filter.merge_negated_criteria(self)
-      filter.log_definition
-      filter
+      chain(NegatedChainingFilter, &block)
     end
 
     # Register and return a new filter that matches a message only if
@@ -95,58 +149,64 @@ module GmailBritta
     # @yield The filter definition block
     # @return [Filter] the new filter
     def also(&block)
-      filter = Filter.new(@britta, :log => @log).perform(&block)
-      filter.merge_positive_criteria(self)
-      filter.log_definition
-      filter
+      chain(PositiveChainingFilter, &block)
     end
 
     # Register (but don't return) a filter that archives the message
     # unless it matches the `:to` email addresses. Optionally, mark
     # the message as read if this filter matches.
     #
-    # @note This method returns the previous filter to make it easier to construct filter chains with {#otherwise} and {#also}.
+    # @note This method returns the previous filter to make it easier
+    #   to construct filter chains with {#otherwise} and {#also}
+    #   with {#archive_unless_directed} in the middle.
     #
     # @option options [true, false] :mark_read If true, mark the message as read
     # @option options [Array<String>] :to a list of addresses that the message may be addressed to in order to prevent this filter from matching. Defaults to the value given to :me on {GmailBritta.filterset}.
-    # @return [Filter] the current (not the newly-constructed filter)
+    # @return [Filter] `self` (not the newly-constructed filter)
     def archive_unless_directed(options={})
       mark_as_read=options[:mark_read]
       tos=Array(options[:to] || me)
-      filter = Filter.new(@britta, :log => @log).perform do
+      filter = PositiveChainingFilter.new(self).perform do
         has_not [{:or => tos.map {|to| "to:#{to}"}}]
         archive
         if mark_as_read
           mark_read
         end
       end
-      filter.merge_positive_criteria(self)
       filter.log_definition
       self
     end
+    #@!endgroup
 
     # Create a new filter object
-    # @note Over the lifetime of {GmailBritta}, new {Filter}s usually get created only by the {Delegate}.
+    # @note Over the lifetime of {GmailBritta}, new {Filter}s usually get created only by the {FilterSet::Delegate}.
     # @param [GmailBritta::Britta] britta the filterset object
     # @option options :log [Logger] a logger for debug messages
     def initialize(britta, options={})
       @britta = britta
       @log = options[:log]
+      @from = []
+      @to = []
+      @has = []
+      @has_not = []
     end
 
     # Return the filter's value as XML text.
     # @return [String] the Atom XML representation of this filter
     def generate_xml
-      engine = Haml::Engine.new(<<-ATOM)
+      generate_xml_properties
+      engine = Haml::Engine.new("
 %entry
   %category{:term => 'filter'}
   %title Mail Filter
   %content
-  - self.class.single_write_accessors.keys.each do |name|
-    - gmail_name = self.class.single_write_accessors[name]
-    - if value = self.send("output_\#{name}".intern)
-      %apps:property{:name => gmail_name, :value => value.to_s}
-ATOM
+#{generate_haml_properties 1}
+", :attr_wrapper => '"')
+      engine.render(self)
+    end
+
+    def generate_xml_properties
+      engine = Haml::Engine.new(generate_haml_properties, :attr_wrapper => '"')
       engine.render(self)
     end
 
@@ -162,59 +222,39 @@ ATOM
     end
 
     protected
+    def filterset; @britta; end
 
-    def merge_negated_criteria(filter)
-      old_has_not = Marshal.load(Marshal.dump((filter.get_has_not || []).reject { |elt|
-            @has.member?(elt)
-          }))
-      old_has = Marshal.load( Marshal.dump((filter.get_has || []).reject { |elt|
-            @has.member?(elt)
-          }))
-      @log.debug("  M: oh  #{old_has.inspect}")
-      @log.debug("  M: ohn #{old_has_not.inspect}")
-
-      @has_not ||= []
-      @has_not += case
-                  when old_has_not.first.is_a?(Hash) && old_has_not.first[:or]
-                    old_has_not.first[:or] += old_has
-                    old_has_not
-                  when old_has_not.length > 0
-                    [{:or => old_has_not + old_has}]
-                  else
-                    old_has
-                  end
-      @log.debug("  M: h #{@has.inspect}")
-      @log.debug("  M: nhn #{@has_not.inspect}")
-    end
-
-    def merge_positive_criteria(filter)
-      new_has = (@has || []) + (filter.get_has || [])
-      new_has_not = (@has_not || []) + (filter.get_has_not || [])
-      @has = new_has
-      @has_not = new_has_not
-    end
+    def logger; @log ; end
 
     def self.emit_filter_spec(filter, infix=' ', recursive=false)
-      str = ''
       case filter
       when String
-        str << filter
+        filter
       when Hash
+        str = ''
         filter.keys.each do |key|
+          infix = ' '
+          prefix = ''
           case key
           when :or
-            str << emit_filter_spec(filter[key], ' OR ', recursive)
+            infix = ' OR '
+          when :and
+            infix = ' AND '
           when :not
-            str << '-'
-            str << emit_filter_spec(filter[key], ' ', true)
+            prefix = '-'
+            recursive = true
           end
+          str << prefix + emit_filter_spec(filter[key], infix, recursive)
         end
+        str
       when Array
-        str << '(' if recursive
-        str << filter.map {|elt| emit_filter_spec(elt, ' ', true)}.join(infix)
-        str << ')' if recursive
+        str_tmp = filter.map {|elt| emit_filter_spec(elt, ' ', true)}.join(infix)
+        if recursive
+          "(#{str_tmp})"
+        else
+          str_tmp
+        end
       end
-      str
     end
 
     # Note a filter definition on the logger.
@@ -222,8 +262,8 @@ ATOM
     def log_definition
       return unless @log.debug?
       @log.debug  "Filter: #{self}"
-      Filter.single_write_accessors.each do |name, gmail_name|
-        val = instance_variable_get(Filter.ivar_name(name))
+      Filter.single_write_accessors.keys.each do |name, gmail_name|
+        val = send(:"get_#{name}")
         @log.debug "  #{name}: #{val}" if val
       end
       self
@@ -232,6 +272,21 @@ ATOM
     # Return the list of emails that the filterset has configured as "me".
     def me
       @britta.me
+    end
+
+    private
+
+    def generate_haml_properties(indent=0)
+      properties =
+"- self.class.single_write_accessors.keys.each do |name|
+  - gmail_name = self.class.single_write_accessors[name]
+  - if value = self.send(\"output_\#{name}\".intern)
+    %apps:property{:name => gmail_name, :value => value.to_s}"
+      if (indent)
+        indent_sp = ' '*indent*2
+        properties = indent_sp + properties.split("\n").join("\n" + indent_sp)
+      end
+      properties
     end
   end
 end

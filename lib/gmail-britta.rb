@@ -13,6 +13,7 @@ require 'logger'
 require 'gmail-britta/single_write_accessors'
 require 'gmail-britta/filter_set'
 require 'gmail-britta/filter'
+require 'gmail-britta/chaining_filter'
 
 # # A generator DSL for importable gmail filter specifications.
 #
@@ -23,6 +24,7 @@ module GmailBritta
   # This is the main entry point for GmailBritta.
   # @option opts :me [Array<String>] A list of email addresses that should be considered as belonging to "you", effectively those email addresses you would expect `to:me` to match.
   # @option opts :logger [Logger] (Logger.new()) An initialized logger instance.
+  # @options opts :author [Hash] The author of the gmail filters. The hash has :name and :email keys
   # @yield the filterset definition block. `self` inside the block is the {FilterSet} instance.
   # @return [FilterSet] the constructed filterset
   def self.filterset(opts={}, &block)

@@ -1,6 +1,8 @@
 # gmail-britta
 
-[![Build Status](https://travis-ci.org/antifuchs/gmail-britta.png?branch=master)](https://travis-ci.org/antifuchs/gmail-britta)
+[![Gem Version](https://img.shields.io/gem/v/gmail-britta.svg)](https://rubygems.org/gems/gmail-britta)
+[![Build Status](https://img.shields.io/travis/antifuchs/gmail-britta/master.svg)](https://travis-ci.org/antifuchs/gmail-britta)
+[![Code Climate](https://img.shields.io/codeclimate/github/antifuchs/gmail-britta.svg)](https://codeclimate.com/github/antifuchs/gmail-britta)
 
 This library helps you generate XML that you can import into gmail's
 filter settings. It makes it more pleasant to write simple (and even

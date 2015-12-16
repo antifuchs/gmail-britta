@@ -1,6 +1,7 @@
 source "http://rubygems.org"
 
 gem 'haml', '~> 3.1.6'
+gem "codeclimate-test-reporter", group: :test, require: nil
 
 
 # Add dependencies to develop your gem here.
