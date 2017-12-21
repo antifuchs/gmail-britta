@@ -79,5 +79,8 @@ DEPENDENCIES
   simplecov
   yard (~> 0.9.11)
 
+RUBY VERSION
+   ruby 2.2.5p319
+
 BUNDLED WITH
    1.13.7
