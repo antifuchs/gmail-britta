@@ -11,7 +11,7 @@ group :development do
   gem "shoulda", ">= 0"
   gem "bundler", ">= 1.2.0"
   gem "minitest"
-  gem "nokogiri"
+  gem "nokogiri", "~> 1.8.1"
 end
 
 group :doc do
@@ -21,5 +21,5 @@ group :doc do
 end
 
 group :release do
-  gem "jeweler", "~> 1.8.4"
+  gem "juwelier"
 end
