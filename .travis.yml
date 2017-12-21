@@ -7,6 +7,9 @@ rvm:
   - "2.1"
   - "2.0"
 before_install: gem update bundler
+env:
+  global:
+    - CC_TEST_REPORTER_ID=56a19efe95a8513862d3afb5bb3c02efc21d33a389b0f80a15e96e8590c84d40
 before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
