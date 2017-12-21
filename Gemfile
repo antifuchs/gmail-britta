@@ -16,7 +16,7 @@ end
 
 group :doc do
   gem "rdoc", "~> 3.12"
-  gem "yard", '~> 0.8.3'
+  gem "yard", '~> 0.9.11'
   gem 'redcarpet', '~> 2.2.2'
 end
 
