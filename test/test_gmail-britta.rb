@@ -2,6 +2,7 @@ require "simplecov"
 SimpleCov.start
 
 require 'bundler/setup'
+require 'minitest'
 require 'minitest/unit'
 require 'nokogiri'
 require 'minitest/autorun'
