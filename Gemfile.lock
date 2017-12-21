@@ -9,8 +9,6 @@ GEM
     addressable (2.5.2)
       public_suffix (>= 2.0.2, < 4.0)
     builder (3.2.3)
-    codeclimate-test-reporter (1.0.8)
-      simplecov (<= 0.13)
     concurrent-ruby (1.0.5)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
@@ -87,7 +85,6 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (>= 1.2.0)
-  codeclimate-test-reporter
   haml (~> 3.1.6)
   juwelier
   minitest
@@ -96,6 +93,7 @@ DEPENDENCIES
   rdoc (~> 3.12)
   redcarpet (~> 2.2.2)
   shoulda
+  simplecov
   yard (~> 0.9.11)
 
 BUNDLED WITH
