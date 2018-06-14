@@ -52,6 +52,8 @@ module GmailBritta
     # @param [String] category the smart label to assign the message
     single_write_accessor :smart_label, 'smartLabelToApply' do |category|
       case category
+      when 'personal', 'Personal'
+        '^smartlabel_personal'
       when 'forums', 'Forums'
         '^smartlabel_group'
       when 'notifications', 'Notifications', 'updates', 'Updates'
