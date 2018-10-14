@@ -15,6 +15,16 @@ module GmailBritta
         super_accessors.merge(direct_single_write_accessors)
       end
 
+      # @return [Array<Symbol>] the criteria single write accessors
+      #   defined on this class and every superclass.
+      def single_write_criteria
+        super_accessors = {}
+        if self.superclass.respond_to?(:single_write_criteria)
+          super_accessors = self.superclass.single_write_criteria
+        end
+        super_accessors.merge(direct_single_write_criteria)
+      end
+
       # Defines a string-typed filter accessor DSL method.  Generates
       # the `[name]`, `get_[name]` and `output_[name]` methods.
       # @param name [Symbol] the name of the accessor method
@@ -37,6 +47,14 @@ module GmailBritta
         else
           output(name, ivar)
         end
+      end
+
+      # Defines a string-typed accessor DSL filter criteria
+      # method. This is a convenience method to more easily allow us
+      # to merge filters for chaining.
+      def define_criteria(name, gmail_name, &block)
+        direct_single_write_criteria[name] = gmail_name
+        single_write_accessor(name, gmail_name, &block)
       end
 
       # Defines a boolean-typed filter accessor DSL method. If the
@@ -81,6 +99,10 @@ module GmailBritta
 
       def direct_single_write_accessors
         @direct_single_write_accessors ||= {}
+      end
+
+      def direct_single_write_criteria
+        @direct_single_write_criteria ||= {}
       end
     end
 
