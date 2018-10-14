@@ -231,7 +231,13 @@ module GmailBritta
     def self.emit_filter_spec(filter, infix=' ', recursive=false)
       case filter
       when String
-        filter
+        if recursive && filter =~ /\s/
+          # filters can be parts of OR groups, which means whitespace
+          # is significant. Let's properly group these:
+          "(#{filter})"
+        else
+          filter
+        end
       when Hash
         str = ''
         filter.keys.each do |key|

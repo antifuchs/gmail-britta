@@ -287,4 +287,16 @@ describe GmailBritta do
       assert_equal('SPAM OR HAM', filter_text)
     end
   end
+
+  it "groups `has` criteria with spaces" do
+    fs = GmailBritta.filterset do
+      filter {
+        has [{:or => ['aaa', 'bbb -ccc']}]
+      }
+    end
+    filters = dom(fs)
+    filter_text = filters.xpath('//apps:property[@name="hasTheWord"]', ns).first['value']
+    assert_equal('(aaa OR (bbb -ccc))', filter_text)
+  end
+
 end
