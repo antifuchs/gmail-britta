@@ -67,6 +67,7 @@ With gmail-britta, it's just this:
 GmailBritta.filterset do
   filter {
     has %w{list:discuss@lists.some-side-project.org}
+    label "some-side-project"
   }.archive_unless_directed
 end
 ```
