@@ -27,6 +27,17 @@ module GmailBritta
         perform_merge(@parent)
       end
     end
+
+    protected
+    def load_array(name, criteria)
+      crit = criteria.delete(name)
+      unless crit.is_a?(Array)
+        crit = [crit]
+      end
+      crit.reject do |elt|
+        instance_variable_get("@#{name}").member?(elt)
+      end
+    end
   end
 
   class NegatedChainingFilter < ChainingFilter
@@ -35,37 +46,38 @@ module GmailBritta
     end
 
     def perform_merge(filter)
-      def load(name, filter)
-        filter.send("get_#{name}").reject do |elt|
-          instance_variable_get("@#{name}").member?(elt)
-        end
-      end
+      criteria = filter.criteria
+      @to += invert(load_array(:to, criteria))
+      @from += invert(load_array(:from, criteria))
+      @subject += invert(load_array(:subject, criteria))
+      @has_not += deep_invert(load_array(:has_not, criteria), load_array(:has, criteria))
 
-      def invert(old)
-        old.map! do |addr|
-          if addr[0] == '-'
-            addr[1..-1]
-          else
-            '-' + addr
-          end
-        end
+      if criteria.keys.length > 0
+        raise("Did not invert criteria #{criteria.keys} - this is likely a bug in gmail-britta")
       end
+    end
 
-      def deep_invert(has_not, has)
-        case
-        when has_not.first.is_a?(Hash) && has_not.first[:or]
-          has_not.first[:or] += has
-          has_not
-        when has_not.length > 0
-          [{:or => has_not + has}]
+    private
+    def invert(old)
+      old.map! do |addr|
+        if addr[0] == '-'
+          addr[1..-1]
         else
-          has
+          '-' + addr
         end
       end
+    end
 
-      @to += invert(load(:to, filter))
-      @from += invert(load(:from, filter))
-      @has_not += deep_invert(load(:has_not, filter), load(:has, filter))
+    def deep_invert(has_not, has)
+      case
+      when has_not.first.is_a?(Hash) && has_not.first[:or]
+        has_not.first[:or] += has
+        has_not
+      when has_not.length > 0
+        [{:or => has_not + has}]
+      else
+        has
+      end
     end
   end
 
@@ -75,8 +87,19 @@ module GmailBritta
     end
 
     def perform_merge(filter)
-      @has += filter.get_has
-      @has_not += filter.get_has_not
+      criteria = filter.criteria
+      criteria.each do |crit_name, crit_value|
+        ivar = "@#{crit_name.to_s}"
+        have = self.instance_variable_get(ivar)
+        case have
+        # merge if we have a set of values that can be merged:
+        when Array
+          self.instance_variable_set(ivar, have + load_array(crit_name, criteria))
+        # adopt the value if we have nothing yet; otherwise, keep ours:
+        when NilClass
+          self.instance_variable_set(ivar, crit_value)
+        end
+      end
     end
   end
 end

@@ -211,8 +211,8 @@ describe GmailBritta do
       end
     )
 
-    assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="from"][@value="from@boinkor.net"]',ns).length, "Should have the from address")
-    assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="to"][@value="to@boinkor.net"]',ns).length, "Should have the to address")
+    assert_equal(2, filters.xpath('/a:feed/a:entry/apps:property[@name="from"][@value="from@boinkor.net"]',ns).length, "Should have the from address in both filters")
+    assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="to"][@value="to@boinkor.net"]',ns).length, "Should have the to address in only one filter")
   end
 
   it "understands me" do
@@ -286,6 +286,8 @@ describe GmailBritta do
       filter_text = filters.xpath('//apps:property[@name="subject"]', ns).first['value']
       assert_equal('SPAM OR HAM', filter_text)
     end
+
+
   end
 
   it "groups `has` criteria with spaces" do
@@ -299,4 +301,36 @@ describe GmailBritta do
     assert_equal('(aaa OR (bbb -ccc))', filter_text)
   end
 
+  describe 'chaining' do
+    it 'does not fail for implicitly-array values' do
+      filters = dom(
+        GmailBritta.filterset(:me => ['me@example.com']) do
+          filter {
+            has 'from:friend'
+            label 'friend-label'
+          }.archive_unless_directed
+        end
+      )
+      assert_equal(2, filters.xpath('/a:feed/a:entry/apps:property[@name="hasTheWord"][@value="from:friend"]',ns).length)
+    end
+
+    it "issues filters for multiple labels" do
+      fs = GmailBritta.filterset() do
+        filter {
+          subject "test"
+
+          label 'first'
+        }.also {
+          label 'second'
+        }.also {
+          label 'third'
+        }
+      end
+      filters = dom(fs)
+      assert_equal(3, filters.xpath('/a:feed/a:entry/apps:property[@name="subject"][@value="test"]',ns).length, "Should have the subject in all filters")
+      assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="label"][@value="first"]',ns).length, "Should assign the first label in only one filter")
+      assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="label"][@value="second"]',ns).length, "Should assign the second label in only one filter")
+      assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="label"][@value="third"]',ns).length, "Should assign the third label in only one filter")
+    end
+  end
 end
