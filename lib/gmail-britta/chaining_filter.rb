@@ -52,6 +52,12 @@ module GmailBritta
       @subject += invert(load_array(:subject, criteria))
       @has_not += deep_invert(load_array(:has_not, criteria), load_array(:has, criteria))
 
+      if criteria.has_key?(:has_attachment)
+        has_attachment = criteria.delete(:has_attachment)
+        unless self.instance_variable_defined?("@has_attachment")
+          @has_attachment = !has_attachment
+        end
+      end
       if criteria.keys.length > 0
         raise("Did not invert criteria #{criteria.keys} - this is likely a bug in gmail-britta")
       end
