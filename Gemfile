@@ -25,3 +25,5 @@ end
 group :release do
   gem "juwelier"
 end
+
+gemspec

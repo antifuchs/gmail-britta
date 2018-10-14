@@ -1,3 +1,9 @@
+PATH
+  remote: .
+  specs:
+    gmail-britta (0.1.7)
+      haml (~> 3.1.6)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -69,6 +75,7 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (>= 1.2.0)
+  gmail-britta!
   haml (~> 3.1.6)
   juwelier
   minitest
