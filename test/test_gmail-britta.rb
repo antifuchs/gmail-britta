@@ -301,7 +301,32 @@ describe GmailBritta do
     assert_equal('(aaa OR (bbb -ccc))', filter_text)
   end
 
-  describe 'chaining' do
+  describe 'filter chaining' do
+    describe 'negative filter chaining' do
+      it 'supports all criteria' do
+        fs = GmailBritta.filterset do
+          filter {
+            self.class.single_write_criteria.keys.each do |crit|
+              # This is mildly gross, but we have to special case this boolean:
+              if crit == :has_attachment
+                has_attachment
+              else
+                self.send(crit, crit.to_s) # e.g. `has "has"`
+              end
+            end
+            label 'positive'
+          }.otherwise {
+            label 'negative'
+          }
+        end
+        _ = dom(fs) # used for side-effect of chained filter merging
+        negative = fs.filters[1]
+        assert_equal(false, negative.get_has_attachment)
+        assert_equal(["-subject"], negative.get_subject)
+        assert_equal(["-to"], negative.get_to)
+      end
+    end
+
     it 'does not fail for implicitly-array values' do
       filters = dom(
         GmailBritta.filterset(:me => ['me@example.com']) do
