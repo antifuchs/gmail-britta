@@ -286,8 +286,18 @@ describe GmailBritta do
       filter_text = filters.xpath('//apps:property[@name="subject"]', ns).first['value']
       assert_equal('SPAM OR HAM', filter_text)
     end
+  end
 
-
+  it 'only emits boolean criteria if set' do
+    fs = GmailBritta.filterset do
+      filter {
+        subject 'SPAM: '
+        label 'important'
+      }
+    end
+    filters = dom(fs)
+    criteria = filters.xpath('//apps:property[@name="hasAttachment"]', ns)
+    assert_equal(0, criteria.length, "Should not have generated hasAttachment criteria")
   end
 
   it "groups `has` criteria with spaces" do

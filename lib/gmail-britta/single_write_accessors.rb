@@ -40,6 +40,7 @@ module GmailBritta
           instance_variable_set(ivar, words)
         end
         get(name, ivar)
+        string_defined(name, ivar)
         if block_given?
           define_method("output_#{name}") do
             instance_variable_get(ivar) && block.call(instance_variable_get(ivar)) unless instance_variable_get(ivar) == []
@@ -55,6 +56,12 @@ module GmailBritta
       def define_criteria(name, gmail_name, &block)
         direct_single_write_criteria[name] = gmail_name
         single_write_accessor(name, gmail_name, &block)
+      end
+
+      # Defines a boolean-typed accessor DSL filter criteria method.
+      def define_boolean_criteria(name, gmail_name, &block)
+        direct_single_write_criteria[name] = gmail_name
+        single_write_boolean_accessor(name, gmail_name, &block)
       end
 
       # Defines a boolean-typed filter accessor DSL method. If the
@@ -77,6 +84,7 @@ module GmailBritta
         end
         get(name, ivar)
         output(name, ivar)
+        boolean_defined(name, ivar)
       end
 
 
@@ -94,6 +102,18 @@ module GmailBritta
       def output(name, ivar)
         define_method("output_#{name}") do
           instance_variable_get(ivar)
+        end
+      end
+
+      def string_defined(name, ivar)
+        define_method("defined_#{name}?") do
+          !self.send("output_#{name}").nil?
+        end
+      end
+
+      def boolean_defined(name, ivar)
+        define_method("defined_#{name}?") do
+          instance_variable_defined?(ivar)
         end
       end
 

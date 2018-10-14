@@ -63,7 +63,7 @@ module GmailBritta
 
     # Filter for messages that have an attachment
     # @macro bool_dsl_method
-    define_criteria :has_attachment, 'hasAttachment'
+    define_boolean_criteria :has_attachment, 'hasAttachment'
     # @!endgroup
 
     # @!group Actions to take on messages in filter blocks
@@ -301,7 +301,8 @@ module GmailBritta
       properties =
 "- self.class.single_write_accessors.keys.each do |name|
   - gmail_name = self.class.single_write_accessors[name]
-  - if value = self.send(\"output_\#{name}\".intern)
+  - if self.send(\"defined_\#{name}?\".intern)
+    - value = self.send(\"output_\#{name}\".intern)
     %apps:property{:name => gmail_name, :value => value.to_s}"
       if (indent)
         indent_sp = ' '*indent*2
