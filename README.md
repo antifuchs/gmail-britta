@@ -1,5 +1,6 @@
 # gmail-britta
 
+[![API Docs](https://img.shields.io/badge/api-docs-brightgreen.svg)](https://www.rubydoc.info/github/antifuchs/gmail-britta/master)
 [![Gem Version](https://img.shields.io/gem/v/gmail-britta.svg)](https://rubygems.org/gems/gmail-britta)
 [![Build Status](https://img.shields.io/travis/antifuchs/gmail-britta/master.svg)](https://travis-ci.org/antifuchs/gmail-britta)
 
