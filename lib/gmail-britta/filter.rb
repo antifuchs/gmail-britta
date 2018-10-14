@@ -203,6 +203,7 @@ module GmailBritta
       @to = []
       @has = []
       @has_not = []
+      @subject = []
     end
 
     # Return the filter's value as XML text.
