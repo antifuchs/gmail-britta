@@ -211,8 +211,8 @@ describe GmailBritta do
       end
     )
 
-    assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="from"][@value="from@boinkor.net"]',ns).length, "Should have the from address")
-    assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="to"][@value="to@boinkor.net"]',ns).length, "Should have the to address")
+    assert_equal(2, filters.xpath('/a:feed/a:entry/apps:property[@name="from"][@value="from@boinkor.net"]',ns).length, "Should have the from address in both filters")
+    assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="to"][@value="to@boinkor.net"]',ns).length, "Should have the to address in only one filter")
   end
 
   it "understands me" do
@@ -288,6 +288,18 @@ describe GmailBritta do
     end
   end
 
+  it 'only emits boolean criteria if set' do
+    fs = GmailBritta.filterset do
+      filter {
+        subject 'SPAM: '
+        label 'important'
+      }
+    end
+    filters = dom(fs)
+    criteria = filters.xpath('//apps:property[@name="hasAttachment"]', ns)
+    assert_equal(0, criteria.length, "Should not have generated hasAttachment criteria")
+  end
+
   it "groups `has` criteria with spaces" do
     fs = GmailBritta.filterset do
       filter {
@@ -299,4 +311,61 @@ describe GmailBritta do
     assert_equal('(aaa OR (bbb -ccc))', filter_text)
   end
 
+  describe 'filter chaining' do
+    describe 'negative filter chaining' do
+      it 'supports all criteria' do
+        fs = GmailBritta.filterset do
+          filter {
+            self.class.single_write_criteria.keys.each do |crit|
+              # This is mildly gross, but we have to special case this boolean:
+              if crit == :has_attachment
+                has_attachment
+              else
+                self.send(crit, crit.to_s) # e.g. `has "has"`
+              end
+            end
+            label 'positive'
+          }.otherwise {
+            label 'negative'
+          }
+        end
+        _ = dom(fs) # used for side-effect of chained filter merging
+        negative = fs.filters[1]
+        assert_equal(false, negative.get_has_attachment)
+        assert_equal(["-subject"], negative.get_subject)
+        assert_equal(["-to"], negative.get_to)
+      end
+    end
+
+    it 'does not fail for implicitly-array values' do
+      filters = dom(
+        GmailBritta.filterset(:me => ['me@example.com']) do
+          filter {
+            has 'from:friend'
+            label 'friend-label'
+          }.archive_unless_directed
+        end
+      )
+      assert_equal(2, filters.xpath('/a:feed/a:entry/apps:property[@name="hasTheWord"][@value="from:friend"]',ns).length)
+    end
+
+    it "issues filters for multiple labels" do
+      fs = GmailBritta.filterset() do
+        filter {
+          subject "test"
+
+          label 'first'
+        }.also {
+          label 'second'
+        }.also {
+          label 'third'
+        }
+      end
+      filters = dom(fs)
+      assert_equal(3, filters.xpath('/a:feed/a:entry/apps:property[@name="subject"][@value="test"]',ns).length, "Should have the subject in all filters")
+      assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="label"][@value="first"]',ns).length, "Should assign the first label in only one filter")
+      assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="label"][@value="second"]',ns).length, "Should assign the second label in only one filter")
+      assert_equal(1, filters.xpath('/a:feed/a:entry/apps:property[@name="label"][@value="third"]',ns).length, "Should assign the third label in only one filter")
+    end
+  end
 end

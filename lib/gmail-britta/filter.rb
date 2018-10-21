@@ -9,7 +9,64 @@ module GmailBritta
   class Filter
     include SingleWriteAccessors
 
-    # @!group Methods for use in a filter definition block
+    # @!group Criteria for matching messages in filter blocks
+    # @!method has(conditions)
+    # @return [void]
+    # Defines the positive conditions for the filter to match.
+    # @overload has([conditions])
+    #   Conditions ANDed together that an incoming email must match.
+    #   @param [Array<conditions>] conditions a list of gmail search terms, all of which must match
+    # @overload has({:or => [conditions]})
+    #   Conditions ORed together for the filter to match
+    #   @param [{:or => conditions}] conditions a hash of the form `{:or => [condition1, condition2]}` - either of these conditions must match to match the filter.
+    define_criteria :has, 'hasTheWord' do |list|
+      emit_filter_spec(list)
+    end
+
+    # @!method from(conditions)
+    # @return [void]
+    # Defines the positive conditions for the filter to match.
+    # Uses: <apps:property name='from' value='postman@usps.gov'></apps:property>
+    # Instead of: <apps:property name='hasTheWord' value='from:postman@usps.gov'></apps:property>
+    define_criteria :from, 'from' do |list|
+      emit_filter_spec(list)
+    end
+
+    # @!method to(conditions)
+    # @return [void]
+    # Defines the positive conditions for the filter to match.
+    # Uses: <apps:property name='to' value='postman@usps.gov'></apps:property>
+    # Instead of: <apps:property name='hasTheWord' value='to:postman@usps.gov'></apps:property>
+    define_criteria :to, 'to' do |list|
+      emit_filter_spec(list)
+    end
+
+    # @!method subject(conditions)
+    # @return [void]
+    # Defines the positive conditions for the filter to match.
+    # @overload subject([conditions])
+    #   Conditions ANDed together that an incoming email must match.
+    #   @param [Array<conditions>] conditions a list of gmail search terms, all of which must match
+    # @overload subject({:or => [conditions]})
+    #   Conditions ORed together for the filter to match
+    #   @param [{:or => conditions}] conditions a hash of the form `{:or => [condition1, condition2]}` - either of these conditions must match to match the filter.
+    define_criteria :subject, 'subject' do |list|
+      emit_filter_spec(list)
+    end
+
+    # @!method has_not(conditions)
+    # @return [void]
+    # Defines the negative conditions that must not match for the filter to be allowed to match.
+    define_criteria :has_not, 'doesNotHaveTheWord' do |list|
+      emit_filter_spec(list)
+    end
+
+    # Filter for messages that have an attachment
+    # @macro bool_dsl_method
+    define_boolean_criteria :has_attachment, 'hasAttachment'
+    # @!endgroup
+
+    # @!group Actions to take on messages in filter blocks
     # Archive the message.
     # @!macro [new] bool_dsl_method
     #   @return [void]
@@ -72,61 +129,6 @@ module GmailBritta
     # @!method forward_to(email)
     # @param [String] email an email address to forward the message to
     single_write_accessor :forward_to, 'forwardTo'
-
-    # @!method has(conditions)
-    # @return [void]
-    # Defines the positive conditions for the filter to match.
-    # @overload has([conditions])
-    #   Conditions ANDed together that an incoming email must match.
-    #   @param [Array<conditions>] conditions a list of gmail search terms, all of which must match
-    # @overload has({:or => [conditions]})
-    #   Conditions ORed together for the filter to match
-    #   @param [{:or => conditions}] conditions a hash of the form `{:or => [condition1, condition2]}` - either of these conditions must match to match the filter.
-    single_write_accessor :has, 'hasTheWord' do |list|
-      emit_filter_spec(list)
-    end
-
-    # @!method from(conditions)
-    # @return [void]
-    # Defines the positive conditions for the filter to match.
-    # Uses: <apps:property name='from' value='postman@usps.gov'></apps:property>
-    # Instead of: <apps:property name='hasTheWord' value='from:postman@usps.gov'></apps:property>
-    single_write_accessor :from, 'from' do |list|
-      emit_filter_spec(list)
-    end
-
-    # @!method to(conditions)
-    # @return [void]
-    # Defines the positive conditions for the filter to match.
-    # Uses: <apps:property name='to' value='postman@usps.gov'></apps:property>
-    # Instead of: <apps:property name='hasTheWord' value='to:postman@usps.gov'></apps:property>
-    single_write_accessor :to, 'to' do |list|
-      emit_filter_spec(list)
-    end
-
-    # @!method subject(conditions)
-    # @return [void]
-    # Defines the positive conditions for the filter to match.
-    # @overload subject([conditions])
-    #   Conditions ANDed together that an incoming email must match.
-    #   @param [Array<conditions>] conditions a list of gmail search terms, all of which must match
-    # @overload subject({:or => [conditions]})
-    #   Conditions ORed together for the filter to match
-    #   @param [{:or => conditions}] conditions a hash of the form `{:or => [condition1, condition2]}` - either of these conditions must match to match the filter.
-    single_write_accessor :subject, 'subject' do |list|
-      emit_filter_spec(list)
-    end
-
-    # @!method has_not(conditions)
-    # @return [void]
-    # Defines the negative conditions that must not match for the filter to be allowed to match.
-    single_write_accessor :has_not, 'doesNotHaveTheWord' do |list|
-      emit_filter_spec(list)
-    end
-
-    # Filter for messages that have an attachment
-    # @macro bool_dsl_method
-    single_write_boolean_accessor :has_attachment, 'hasAttachment'
     # @!endgroup
 
     #@!group Filter chaining
@@ -134,6 +136,16 @@ module GmailBritta
       filter = type.new(self).perform(&block)
       filter.log_definition
       filter
+    end
+
+    def criteria
+      self.class.single_write_criteria.keys.reduce({}) do |res, name|
+        ivar = "@#{name.to_s}"
+        if instance_variable_defined?(ivar)
+          res[name] = instance_variable_get(ivar)
+        end
+        res
+      end
     end
 
     # Register and return a new filter that matches only if this
@@ -191,6 +203,7 @@ module GmailBritta
       @to = []
       @has = []
       @has_not = []
+      @subject = []
     end
 
     # Return the filter's value as XML text.
@@ -288,7 +301,8 @@ module GmailBritta
       properties =
 "- self.class.single_write_accessors.keys.each do |name|
   - gmail_name = self.class.single_write_accessors[name]
-  - if value = self.send(\"output_\#{name}\".intern)
+  - if self.send(\"defined_\#{name}?\".intern)
+    - value = self.send(\"output_\#{name}\".intern)
     %apps:property{:name => gmail_name, :value => value.to_s}"
       if (indent)
         indent_sp = ' '*indent*2

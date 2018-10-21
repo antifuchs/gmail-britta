@@ -14,6 +14,7 @@ group :development do
   gem "bundler", ">= 1.2.0"
   gem "minitest"
   gem "nokogiri", "~> 1.8.1"
+  gem "pry"
 end
 
 group :doc do
@@ -25,3 +26,5 @@ end
 group :release do
   gem "juwelier"
 end
+
+gemspec
