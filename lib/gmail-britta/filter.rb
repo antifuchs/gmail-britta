@@ -119,6 +119,8 @@ module GmailBritta
         '^smartlabel_promo'
       when 'social', 'Social'
         '^smartlabel_social'
+      when 'receipt', 'Receipt'
+        '^smartlabel_receipt'
       else
         raise 'invalid category "' << category << '"'
       end
